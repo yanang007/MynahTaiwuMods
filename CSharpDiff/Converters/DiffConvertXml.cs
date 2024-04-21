@@ -29,7 +29,8 @@ namespace CSharpDiff.Converters
                     ret.Add("<del>");
                 }
 
-                ret.Add(HttpUtility.HtmlEncode(change.value));
+                ret.Add(change.value);
+                // ret.Add(HttpUtility.HtmlEncode(change.value));
 
                 if (change.added == true)
                 {

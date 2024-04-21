@@ -156,25 +156,35 @@ public static class SpriteAssetManager
         for (var i = 0; i < spriteInfoList.Count; i++)
         {
             var oldSprite = spriteInfoList[i];
-            var spriteGlyph = new TMP_SpriteGlyph
-            {
-                index = (uint)i,
-                sprite = oldSprite.sprite,
-                metrics = new GlyphMetrics(oldSprite.width, oldSprite.height, oldSprite.xOffset,
-                    oldSprite.yOffset, oldSprite.xAdvance),
-                glyphRect = new GlyphRect((int)oldSprite.x, (int)oldSprite.y, (int)oldSprite.width,
-                    (int)oldSprite.height),
-                scale = 1f,
-                atlasIndex = 0
-            };
+
+            var spriteGlyph = new TMP_SpriteGlyph(
+                (uint)i,
+                new GlyphMetrics(oldSprite.width, oldSprite.height, oldSprite.xOffset, oldSprite.yOffset,
+                    oldSprite.xAdvance),
+                new GlyphRect((int)oldSprite.x, (int)oldSprite.y, (int)oldSprite.width, (int)oldSprite.height),
+                1f,
+                0,
+                oldSprite.sprite
+            );
+            // var spriteGlyph = new TMP_SpriteGlyph
+            // {
+            //     index = (uint)i,
+            //     sprite = oldSprite.sprite,
+            //     metrics = new GlyphMetrics(oldSprite.width, oldSprite.height, oldSprite.xOffset,
+            //         oldSprite.yOffset, oldSprite.xAdvance),
+            //     glyphRect = new GlyphRect((int)oldSprite.x, (int)oldSprite.y, (int)oldSprite.width,
+            //         (int)oldSprite.height),
+            //     scale = 1f,
+            //     atlasIndex = 0
+            // };
             m_SpriteGlyphTable.Add(spriteGlyph);
-            
+
             var spriteName = oldSprite.name;
             if (spriteName.EndsWith("(Clone)"))
             {
                 spriteName = spriteName.Substring(0, spriteName.Length - 7);
             }
-            
+
             var spriteCharacter = new TMP_SpriteCharacter
             {
                 glyph = spriteGlyph,

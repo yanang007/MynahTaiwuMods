@@ -1,4 +1,5 @@
-﻿using Config;
+﻿using System.Collections.Generic;
+using Config;
 using GameData.Domains;
 using GameData.Domains.Map;
 
