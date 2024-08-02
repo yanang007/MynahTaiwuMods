@@ -15,11 +15,11 @@ public class CharacterNameClickLinkHandlerPatch
     [HarmonyPostfix]
     static void SetBtnInteractionAndClickListenerPostfix(CButton btn, bool interactable, int charId)
     {
+        if (!ModEntry.MTC_CharacterNameClickLink) return;
         if (btn == null) return;
         var dp = btn.GetComponent<MouseTipDisplayer>();
         if (dp == null) return;
 
-        Util.EnableMouseTipCharacter(dp, charId,
-            ModEntry.ReplaceAllCharacterTipToDetail ? 2 : 1);
+        Util.EnableMouseTipCharacter(dp, charId, true);
     }
 }

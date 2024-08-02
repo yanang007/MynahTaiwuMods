@@ -89,7 +89,7 @@ public partial class ModEntry
             if (____charId < 0 || ____displayData == null)
                 return;
             bool isTaiwu = ____charId == SingletonObject.getInstance<BasicGameData>().TaiwuCharId;
-            string nameByDisplayData1 = NameCenter.GetCharMonasticTitleOrNameByDisplayData(____displayData, isTaiwu);
+            string nameByDisplayData1 = NameCenter.GetMonasticTitleOrDisplayName(____displayData, isTaiwu);
             string nameByDisplayData2 = NameCenter.GetNameByDisplayData(____displayData, isTaiwu, true);
             string color = ____displayData.AliveState == 0 ? "white" : "red";
 

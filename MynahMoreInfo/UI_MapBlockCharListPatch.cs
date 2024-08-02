@@ -4,9 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using FrameWork;
-using GameData.Domains.Character.Display;
 using HarmonyLib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace MynahMoreInfo;
@@ -16,7 +14,6 @@ namespace MynahMoreInfo;
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public class UI_MapBlockCharListPatch
 {
-
     [HarmonyPatch(typeof(MapBlockCharNormal), "Refresh")]
     [HarmonyPostfix]
     static void MapBlockCharNormalRefreshPostfix(
@@ -24,14 +21,14 @@ public class UI_MapBlockCharListPatch
         // CharacterDisplayData characterDisplayData,
         MapBlockCharNormal __instance)
     {
-        if (ModEntry.MouseTipMapBlockCharList == 0) return;
+        if (ModEntry.MTC_MapBlockCharList == false) return;
 
         var charId = __instance.CharId;
         Transform transform = __instance.transform;
 
         EnableMouseTipChar(charId, transform);
     }
-    
+
     [HarmonyPatch(typeof(MapBlockCharGrave), "Refresh")]
     [HarmonyPostfix]
     static void MapBlockCharGraveRefreshPostfix(
@@ -39,7 +36,7 @@ public class UI_MapBlockCharListPatch
         // CharacterDisplayData characterDisplayData,
         MapBlockCharGrave __instance)
     {
-        if (ModEntry.MouseTipMapBlockCharList == 0) return;
+        if (ModEntry.MTC_MapBlockCharList == false) return;
 
         var charId = __instance._graveDisplayData.Id;
         Transform transform = __instance.transform;
@@ -67,14 +64,9 @@ public class UI_MapBlockCharListPatch
 
             // Debug.Log($"charId: {characterId}, disp: {(charDisplayData?.FullName ?? ____graveDataDict[charIndex].NameData.FullName).GetName(charDisplayData?.Gender ?? ____graveDataList[charIndex].NameData.Gender, new Dictionary<int, string>())}");
 
-            switch (ModEntry.MouseTipMapBlockCharList)
+            if (ModEntry.MTC_MapBlockCharList)
             {
-                case 2:
-                    GetAlternateCharTipStr(mouseTipDisplayer, null, characterId);
-                    break;
-                case 1:
-                    Util.EnableMouseTipCharacter(mouseTipDisplayer, characterId);
-                    break;
+                Util.EnableMouseTipCharacter(mouseTipDisplayer, characterId);
             }
         }
         catch (Exception e)
@@ -82,19 +74,5 @@ public class UI_MapBlockCharListPatch
             Debug.Log(e);
         }
     }
-
-    static void GetAlternateCharTipStr(MouseTipDisplayer displayer, [CanBeNull] CharacterDisplayData displayData, int charId)
-    {
-        displayer.Type = TipType.SimpleWide;
-        displayer.RuntimeParam = new ArgumentBox();
-        displayer.RuntimeParam.Set("arg0", "人物浮窗加载中");
-        displayer.RuntimeParam.Set("arg1", "人物浮窗加载中");
-        displayer.RuntimeParam.Set("_mmi_charId", charId);
-        if (displayData != null)
-        {
-            displayer.RuntimeParam.SetObject("_mmi_mtc_charDisplayData", displayData);
-        }
-
-        displayer.enabled = true;
-    }
+    
 }

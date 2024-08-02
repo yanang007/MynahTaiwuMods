@@ -19,7 +19,7 @@ public class MouseTipManagerPatch
     public static void ShowTipsPrefix(ref TipType type,
         ref ArgumentBox argsBox)
     {
-        if (!ModEntry.ReplaceAllCharacterTipToDetail || (type != TipType.Character && type != TipType.LifeCombatSkillValue)) return;
+        if (type != TipType.Character && type != TipType.CharacterComplete && type != TipType.LifeCombatSkillValue) return;
         
         if (argsBox.Get<AvatarRelatedData>("avatar", out _))
         {
@@ -38,9 +38,17 @@ public class MouseTipManagerPatch
         }
         // Debug.Log("charId: " +  charId);
 
-        type = TipType.SimpleWide;
-        argsBox.Set("_mmi_charId", charId);
-        argsBox.Set("_mmi_locationShow", type != TipType.LifeCombatSkillValue); // 石屋不显示位置
+        if (ModEntry.MouseTipCharStyle == 1)
+        {
+            type = TipType.SimpleWide;
+            argsBox.Set("_mmi_charId", charId);
+            argsBox.Set("_mmi_locationShow", type != TipType.LifeCombatSkillValue); // 石屋不显示位置
+        }
+        else
+        {
+            type = TipType.CharacterComplete;
+            argsBox.Set("CharId", charId);
+        }
         // if (argsBox.Get("locationShow", out bool showLocation))
         // {
         //     argsBox.Set("_mmi_locationShow", showLocation);

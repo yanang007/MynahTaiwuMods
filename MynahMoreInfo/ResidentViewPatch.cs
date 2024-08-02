@@ -27,10 +27,10 @@ public class ResidentViewPatch
 
     private static void EnsureCharMouseTip(ResidentView __instance, int charId)
     {
-        if (ModEntry.MouseTipResidentView == 0) return;
+        if (!ModEntry.MTC_ResidentView) return;
         var transform = __instance.transform.Find("CharInfoHolder");
         if (transform == null) return;
         var mouseTipDisplayer = Util.EnsureMouseTipDisplayer(transform.gameObject);
-        Util.EnableMouseTipCharacter(mouseTipDisplayer, charId, ModEntry.MouseTipResidentView);
+        Util.EnableMouseTipCharacter(mouseTipDisplayer, charId);
     }
 }

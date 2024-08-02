@@ -21,29 +21,30 @@ public class MouseTipMapBlockPatch
     public static void Postfix(MouseTipMapBlock __instance, ArgumentBox argsBox)
     {
         argsBox.Get("MapBlockData", out MapBlockData blockData);
-        
+
         if (ModEntry.ShowPosAndId)
         {
             var pos = blockData.GetBlockPos();
-            var str = $"\n世界坐标(AreaId, BlockId): ({blockData.AreaId},{blockData.BlockId})\n区域坐标(x, y): ({pos.X},{pos.Y})";
-         
+            var str =
+                $"\n世界坐标(AreaId, BlockId): ({blockData.AreaId},{blockData.BlockId})\n区域坐标(x, y): ({pos.X},{pos.Y})";
+
             var mapBlockItem = MapBlock.Instance[blockData.TemplateId];
             __instance.CGet<TextMeshProUGUI>("Desc").text = (mapBlockItem.Desc + str).ColorReplace();
         }
 
-        if (ModEntry.MapBlockMouseTipHighlightResource && !blockData.IsCityTown())
+        if (ModEntry.MapBlockMouseTipHighlightResourceNumber > 0 && !blockData.IsCityTown())
         {
             var names = new[] { "Food", "Wood", "Stone", "Jade", "Silk", "Herbal" };
             var colors = new[] { "#adcb84", "#c68639", "#81b1c0", "#52c3ad", "#c66963", "#6bb963" };
             for (var i = 0; i < 6; i++)
             {
                 var text = __instance.transform.Find($"ResourceLayout/ResourceHolder/{names[i]}/ValueBack/Current");
-                if(text == null) continue;
+                if (text == null) continue;
 
                 var curr = blockData.CurrResources.Get(i);
                 var max = blockData.MaxResources.Get(i);
 
-                text.GetComponent<TextMeshProUGUI>().text = curr > 100
+                text.GetComponent<TextMeshProUGUI>().text = curr >= ModEntry.MapBlockMouseTipHighlightResourceNumber
                     ? $"<color={colors[i]}>{curr}/{max}</color>"
                     : $"{curr}/{max}</color>";
             }
@@ -76,16 +77,13 @@ public class MouseTipMapBlockPatch
                     if (index >= blockCharList.Count) break;
                     var num = blockCharList[index];
                     var nameRelatedData = _nameRelatedDataList[index];
-                    var byNameRelatedData =
-                        NameCenter.GetCharMonasticTitleAndNameByNameRelatedData(ref nameRelatedData, false, false);
-                    var name = NameCenter.GetName(ref nameRelatedData, false, true);
-                    var str = name.surname + name.givenName;
+                    var displayName =
+                        NameCenter.GetMonasticTitleOrDisplayName(ref nameRelatedData, false);
+                    var realName = NameCenter.GetRealName(ref nameRelatedData);
                     var gradeColor = Colors.Instance.GradeColors[nameRelatedData.OrgGrade];
-                    if (byNameRelatedData == str)
-                        stringBuilder.Append($"{byNameRelatedData.SetColor(gradeColor)}");
-                    else
-                        stringBuilder.Append(
-                            $"{byNameRelatedData.SetColor(gradeColor)}/{str.SetColor(gradeColor)}");
+                    stringBuilder.Append(displayName == realName
+                        ? $"{displayName.SetColor(gradeColor)}"
+                        : $"{displayName.SetColor(gradeColor)}/{realName.SetColor(gradeColor)}");
 
                     if (ModEntry.ShowPosAndId) stringBuilder.Append($"({num})");
 

@@ -28,6 +28,19 @@ public static class SpriteAssetManager
             "sp_icon_renwutexing_9",
             "sp_icon_renwutexing_10",
             "sp_icon_renwutexing_11",
+            "sp_icon_personality_0",
+            "sp_icon_personality_1",
+            "sp_icon_personality_2",
+            "sp_icon_personality_3",
+            "sp_icon_personality_4",
+            "sp_icon_personality_5",
+            "sp_icon_personality_6",
+            "sp_icon_attribute_0",
+            "sp_icon_attribute_1",
+            "sp_icon_attribute_2",
+            "sp_icon_attribute_3",
+            "sp_icon_attribute_4",
+            "sp_icon_attribute_5",
         };
 
         var sprites = new List<Sprite>();

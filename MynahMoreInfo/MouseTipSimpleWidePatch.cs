@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Config;
+using DisplayConfig;
 using FrameWork;
 using GameData.Domains;
 using GameData.Domains.Character;
@@ -12,6 +13,7 @@ using GameData.Domains.Character.Display;
 using GameData.Domains.Item;
 using GameData.Domains.Mod;
 using GameData.Serializer;
+using GameData.Utilities;
 using HarmonyLib;
 using JetBrains.Annotations;
 using MiniJSON;
@@ -43,7 +45,7 @@ public class MouseTipSimpleWidePatch
         if (hasDisplayData)
         {
             charId = displayData.CharacterId;
-        } 
+        }
 
         var titleText = __instance.CGet<TextMeshProUGUI>("Title");
         var contentText = __instance.CGet<TextMeshProUGUI>("Desc");
@@ -67,7 +69,7 @@ public class MouseTipSimpleWidePatch
             ModEntry.StaticModIdStr,
             $"GetCharacterData|{charId}",
             false,
-            gCall.AddAction("CharacterData")); 
+            gCall.AddAction("CharacterData"));
 
         gCall.OnAllOver = dict =>
         {
@@ -151,7 +153,7 @@ public class MouseTipSimpleWidePatch
 
         var isTaiwu = groupCharDisplayData != null && groupCharDisplayData.CharacterId ==
             SingletonObject.getInstance<BasicGameData>().TaiwuCharId;
-        var showName = NameCenter.GetCharMonasticTitleOrNameByDisplayData(displayData, isTaiwu);
+        var showName = NameCenter.GetMonasticTitleOrDisplayName(displayData, isTaiwu);
         var realName = NameCenter.GetNameByDisplayData(displayData, isTaiwu, true);
         // var color = displayData.AliveState == 0 ? "white" : "red";
 
@@ -162,17 +164,16 @@ public class MouseTipSimpleWidePatch
             ? $"{(object)showName}/{(object)realName}"
             : showName;
 
-        if (ModEntry.ShowPosAndId)
+        if (ModEntry.ModMTCShowCharId)
             title += $"({(object)displayData.CharacterId})";
 
         // 性别
         title += " · " + CommonUtils.GetGenderString(displayData.Gender);
 
-
         // 年龄
         if (isAlive)
         {
-            title += " · " + groupCharDisplayData!.CurrAge + "岁"; 
+            title += " · " + groupCharDisplayData!.CurrAge + "岁";
         }
 
         // 性格
@@ -283,18 +284,18 @@ public class MouseTipSimpleWidePatch
         }
 
         var timeManager = SingletonObject.getInstance<TimeManager>();
-
-        var birthMonth = displayData.BirthDate % 12;
-        if (birthMonth < 0)
-            birthMonth += 12;
-
-        var monthItem = Month.Instance[birthMonth];
-
-        var fiveElements = monthItem.FiveElementsTypeDesc
-            .SetColor(Colors.Instance.FiveElementsColors[monthItem.FiveElementsType]);
-
+        
         if (isAlive)
         {
+            var birthMonth = groupCharDisplayData!.BirthDate % 12;
+            if (birthMonth < 0)
+                birthMonth += 12;
+
+            var monthItem = Month.Instance[birthMonth];
+
+            var fiveElements = monthItem.FiveElementsTypeDesc
+                .SetColor(Colors.Instance.FiveElementsColors[monthItem.FiveElementsType]);
+
             sb.AppendLine($"    生于{monthItem.Name}({fiveElements})");
         }
         else
@@ -309,7 +310,7 @@ public class MouseTipSimpleWidePatch
             var title1 = groupCharDisplayData != null ? "所在" : "葬于";
             sb.AppendLine($"{title1}： {blockFullName}    ");
         }
-        
+
 
         if (groupCharDisplayData != null)
         {
@@ -332,6 +333,40 @@ public class MouseTipSimpleWidePatch
                     $"LK_ItemSubType_{hatingItemSubType}")
                 : LocalStringManager.Get("LK_None");
             sb.AppendLine($"      厌恶： <color=#843029>{hateItemStr}</color>");
+            
+            if (ModEntry.ModMTCShowAttributes) // 主属性
+            {
+                sb.AppendLine();
+                var names = new[] { "膂力", "灵敏", "定力", "体质", "根骨", "悟性", };
+                
+                for (var index = 0; index < 6; ++index)
+                {
+                    var number = groupCharDisplayData.MaxMainAttributes[index];
+
+                    sb.Append(
+                        $"<pos={(index % 3) * 33}%>{Util.GetSpriteStr($"sp_icon_attribute_{index}")}{names[index]}: {number.ToString()}");
+                    if (index == 2) sb.AppendLine();
+                }
+
+                sb.AppendLine();
+            }
+
+            if (ModEntry.ModMTCShowPersonalities) // 七元赋性
+            {
+                sb.AppendLine();
+                
+                for (var index = 0; index < 7; ++index)
+                {
+                    var personalityItem = Personality.Instance[index];
+                    var number = groupCharDisplayData.Personalities[index];
+
+                    sb.Append(
+                        $"<pos={(index % 4) * 25}%>{Util.GetSpriteStr(personalityItem.Icon)}{personalityItem.Name}: {number.ToString()}");
+                    if (index == 3) sb.AppendLine();
+                }
+
+                sb.AppendLine();
+            }
 
             sb.AppendLine();
 
@@ -506,16 +541,15 @@ public class MouseTipSimpleWidePatch
                     sb.AppendLine("擅长功法：" + str + " 等");
                 }
             }
-
         }
-        else if(otherData.TryGetValue("GraveLevel", out var graveLevelValue))
+        else if (otherData.TryGetValue("GraveLevel", out var graveLevelValue))
         {
             var graveLevel = Convert.ToInt32(graveLevelValue);
             var graveDurability = Convert.ToInt16(otherData["GraveDurability"]);
             var maxGraveDurability = GlobalConfig.Instance.GraveDurabilities[graveLevel];
             sb.AppendLine($"坟墓等级： {graveLevel}\t坟墓耐久：{graveDurability}/{maxGraveDurability}");
         }
-        
+
         if (otherData.TryGetValue("AvailableItems", out var value2))
         {
             var list = (List<object>)value2;
@@ -533,7 +567,7 @@ public class MouseTipSimpleWidePatch
                 // .Select(it => it.Name.SetGradeColor(it.Grade))
                 // .Join(null, " ");
                 // ItemTemplateHelper.GetName()
-                var itemHeader = isAlive? "持有物品：" : "葬有物品：";
+                var itemHeader = isAlive ? "持有物品：" : "葬有物品：";
                 sb.AppendLine(itemHeader + names.Join(null, "<space=1em>") + " 等");
             }
         }

@@ -5,6 +5,7 @@ using ConchShip.EventConfig.Taiwu;
 using Config;
 using Config.EventConfig;
 using GameData.Domains;
+using GameData.Domains.Character;
 using GameData.Domains.Character.Display;
 using GameData.Domains.Item;
 using GameData.Domains.Mod;
@@ -12,6 +13,7 @@ using GameData.Domains.TaiwuEvent;
 using GameData.Utilities;
 using HarmonyLib;
 using MiniJSON;
+using LifeSkillType = Config.LifeSkillType;
 
 namespace MynahMoreInfoBackend;
 

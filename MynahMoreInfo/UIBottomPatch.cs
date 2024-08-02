@@ -22,7 +22,7 @@ public class UIBottomPatch
         
         if (isExist)
         {
-            Util.EnableMouseTipCharacter(mouseTipDisplayer, charId, 2);
+            Util.EnableMouseTipCharacter(mouseTipDisplayer, charId);
         }
     }
 }
