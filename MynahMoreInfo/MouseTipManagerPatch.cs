@@ -20,6 +20,8 @@ public class MouseTipManagerPatch
         ref ArgumentBox argsBox)
     {
         if (type != TipType.Character && type != TipType.CharacterComplete && type != TipType.LifeCombatSkillValue) return;
+
+        int charId = 0;
         
         if (argsBox.Get<AvatarRelatedData>("avatar", out _))
         {
@@ -31,10 +33,12 @@ public class MouseTipManagerPatch
             return;
         }
         
-        if(!argsBox.Get("charId", out int charId) || charId < 0)
+        if(!argsBox.Get("charId", out charId) || charId < 0)
         {
-            type = TipType.Character;
-            return;
+            if(!argsBox.Get("CharId", out charId) || charId < 0)
+            {
+                return;
+            }
         }
         // Debug.Log("charId: " +  charId);
 
