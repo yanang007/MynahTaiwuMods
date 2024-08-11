@@ -50,7 +50,7 @@ public class MouseTipManagerPatch
         }
         else
         {
-            type = TipType.CharacterComplete;
+            // type = TipType.CharacterComplete;
             argsBox.Set("CharId", charId);
         }
         // if (argsBox.Get("locationShow", out bool showLocation))
