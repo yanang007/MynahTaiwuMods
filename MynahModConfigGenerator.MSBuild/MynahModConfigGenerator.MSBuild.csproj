@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net48;net6.0</TargetFrameworks>
+        <DebugType>embedded</DebugType>
+        
+        <PackageId>MynahModConfigGenerator.MSBuild</PackageId>
+        <Version>1.0.0</Version>
+        <Description>MSBuild integration for MynahModConfigGenerator</Description>
+        <PackageReadmeFile>readme.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    
+        <BaseModPrefix>..\MynahTaiwuMods\MynahBaseMod</BaseModPrefix>
+    
+        <PluginTarget Condition="'$(TargetFramework)' == 'net48'">Frontend</PluginTarget>
+        <PluginTarget Condition="'$(TargetFramework)' == 'net6.0'">Backend</PluginTarget>
+
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyBaseMod;CopyGenerator</TargetsForTfmSpecificBuildOutput>
+        <NoWarn>$(NoWarn);MSB3270</NoWarn> <!-- 忽略编译结果为AnyCPU架构警告，其只通过shell调用ConfigGenerator可执行文件 -->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.4" PrivateAssets="all" ExcludeAssets="Runtime" />
+        <PackageReference Include="NuGet.Build.Tasks.Pack" Version="6.11.0" PrivateAssets="all" ExcludeAssets="Runtime" />
+
+        <ProjectReference Include="..\MynahBaseModBase\MynahBaseModBase.csproj" PrivateAssets="all" />
+        <ProjectReference Include="..\MynahBaseMod$(PluginTarget)\MynahBaseMod$(PluginTarget).csproj" PrivateAssets="all" />
+      
+        <!-- 将ConfigGenerator添加引用，触发生成可执行文件 -->
+        <ProjectReference Include="..\MynahModConfigGenerator\MynahModConfigGenerator.csproj" PrivateAssets="all" Condition="'$(TargetFramework)' == 'net6.0'" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <None Include=".\readme.md" Pack="true" PackagePath="" />
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="" />
+      
+        <!-- 定义GenerateTaiwuConfigTask，引入NuGet包的项目会自动引入该配置文件 -->
+        <Content Include="$(MSBuildProjectName).props" Pack="true" PackagePath="build" />
+    </ItemGroup>
+
+    <!-- 将BaseMod添加到包中，方便其他项目引用 -->
+    <Target Name="CopyBaseMod" DependsOnTargets="ResolveReferences">
+        <ItemGroup>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'MynahBaseModBase'" />
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'MynahBaseMod$(PluginTarget)'" />
+        </ItemGroup>
+    </Target>
+
+    <!-- 打包ConfigGenerato至tools路径下 -->
+    <Target Name="CopyGenerator" DependsOnTargets="ResolveReferences">
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="..\MynahModConfigGenerator\$(BaseOutputPath)\$(Configuration)\$(TargetFramework)\*.exe" PackagePath="tools" Condition="'$(TargetFramework)' == 'net6.0'" />
+        </ItemGroup>
+    </Target>
+</Project>
