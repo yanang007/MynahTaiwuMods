@@ -38,13 +38,26 @@ namespace ConfigGenerator
 
             IEnumerable<string> args = new string[] { ConfigLuaPath }.Concat(TargetDlls);
 
-            Process p = Process.Start(new ProcessStartInfo
+            string err = null;
+            using (Process proc = new Process())
             {
-                FileName=generatorPath,
-                Arguments=args.Select(WrapParam).Join(" "),
-                UseShellExecute=false,
-            });
-            p.WaitForExit();
+                ProcessStartInfo procInfo = new ProcessStartInfo()
+                {
+                    FileName = generatorPath,
+                    Arguments = args.Select(WrapParam).Join(" "),
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                };
+                proc.StartInfo = procInfo;
+                proc.Start();
+
+                err = proc.StandardError.ReadToEnd();
+            }
+
+            if (!string.IsNullOrEmpty(err))
+            {
+                throw new Exception(err);
+            }
 
             return true;
         }
